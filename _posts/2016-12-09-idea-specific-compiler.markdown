@@ -12,7 +12,7 @@ project. Here is a short summary of what eventually worked for me:
 
 At this point, compiling your modules should use the expected java
 version. If not, try reading the original IntelliJ IDEA documentation
-on the [Java Compiler][1] and [Using multiple JDKs][2], hope they help.
+on the [Java Compiler][1] and [Using multiple JDKs][2], hope it helps.
 
 
 [1]: https://www.jetbrains.com/help/idea/2016.2/java-compiler.html
