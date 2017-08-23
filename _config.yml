@@ -18,5 +18,5 @@ github_username:  all3fox
 # Build settings
 markdown: kramdown
 
-gems:
+plugins:
   - jekyll-gist
