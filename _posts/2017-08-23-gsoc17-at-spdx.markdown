@@ -1,0 +1,132 @@
+---
+layout: post
+title: GSoC17 at SPDX
+---
+
+TL;DR here are my commits to three open-source projects during this summer:
+
+1. [Contributions to Transcrypt][1], a python-to-javascript transpiler
+2. [Contributions to boolean.py][2], a library for parsing boolean logic
+3. [Contributions to license-expression][3], a library for parsing license information
+
+# What are these projects, why three?
+
+The [`license-expression`][4] is a small python library that allows you to parse and simplify phrases like *gpl-2.0*, *gpl-2.0 or later*, *bsd 3-clause or gpl-2.0 with classpath exception*. Some large project usually reuses a few existing subprojects that have different licenses, so non-straightforward expressions do arise. The [`boolean.py`][5] library is a no-dependencies python library that largely powers `license-expression` and does most of the boolean heavy lifting.
+
+The goal for me this summer was to port `license-expression` over to javascript without manually rewriting the libraries. For that I used [`Transcrypt`][5], a python package that can read you python module (and most of the things that module imports) and produce a single javascript file that would largely implement all of the functionality.
+
+# What has been done?
+
+Some research went into choosing a transpilation tool first. Transpiling is a hot and moving topic, covered during [PyCon2017][6] and boasting a number of tools like [`Brython`][7], [`Batavia`][8], [`Transcrypt`][9] and [a few others][10] (and these are only Python -> JavaScript).
+
+`Transcrypt` was chosen but it does not guarantee full support of Python features. So, I added some of the functionality: the [`__future__` module had to be mocked][11], the [`string` methods had to be expended][12], the [truth-value][13] and [len calculations][14] had to be fixed among other things.
+
+On the other hand, some of the more advanced Python features simply provided too little "return on investment" to be implemented. So, I was fixing multiple inheritance, dropping classmethods, rewriting generators explicitly and making [a *lot* of other changes][3] that generally used a simpler subset of Python.
+
+As a result, transpiling these libraries became possible and a lot of functionality successfully resurfaced on the JavaScript side. For instance, `license-expression` can recognise predefined `LicenseSymbol`'s and run an [Aho-Corasick string matching algorithm][15] on the supplied text. Without a single line of hand-written JavaScript code!
+
+# What is left to do?
+
+There are still a few places that do not work. For instance, if you supply text that cannot actually be parsed as a valid boolean expression, more likely than not a non-descriptive `TypeError` will be thrown.
+
+Also, some of the more complicated expressions are only partially parsed, where the "end" of an expression disappears. You can take a look at the (sometimes skipped) JavaScript unit-tests, they give a good sense of the working and non-working features.
+
+# Thank you
+
+I would like to thank Google for the [GSoC program][16] and [SPDX][17] for taking part and providing interesting open-source projects. I would also like to thank my mentor [Philippe Ombredanne][18] for sharing the expertise and supporting all the way. I've learned a lot this summer and advanced as a developer!
+
+# How to transpile `boolean.py` and `license-expression` to javascript?
+
+#### `boolean.py`
+
+1. Clone the library with:
+```
+git clone git@github.com:bastikr/boolean.py
+```
+
+2. If [this pull request][2] is unmerged, then check it out too:
+```
+git fetch origin pull/72/head:transpile
+git checkout transpile
+```
+
+3. Create and activate a python virtual environment the way you usually do it. For me it is:
+```
+pyenv virtualenv 3.6.2 boolean.py-venv-3.6.2
+pyenv local boolean.py-venv-3.6.2
+```
+
+4. Install Transcrypt into your virtual environment with:
+```
+pip install -r transpile/requirements.txt
+```
+
+5. Now you should be all set to transpile the library into javascript:
+```
+python transpile/transpile.py
+```
+
+This creates `boolean.js/__javascript__/boolean.js`, essentially `boolean.py` but in JavaScript. You can verify that the produced code works by running the unit-tests:
+```
+yarn install
+yarn test
+```
+
+Finally, if you want to run your javascript in the browser, transpile with:
+```
+python transpile/transpile.py --browser
+```
+
+Note: the only difference between the browser version and the node version is that the former defines a `boolean` object on a `window` object while the latter defines a `boolean` object on the `module.exports` object. However, the unit-tests will fail if you transpile for the browser.
+
+#### `license-expression`
+
+In contrast to `boolean.py`, there are some dependencies and a custom system to bundle those dependencies together. So, you first should follow the `install instructions for developers`. After that you should do a bit more:
+
+1. If [this pull request is unmerged][3], then check it out too:
+```
+git fetch origin pull/72/head:transpile
+git checkout transpile
+```
+
+2. Add dependencies to the virtual environment from the development profile:
+```
+./configure etc/conf/dev/transpile
+```
+
+3. Now you should be all set to transpile the library into javascript:
+```
+./bin/python transpile/transpile.py
+```
+
+This creates a `license-expression.js/__javascript__/__init__.js`, essentially `license-expression` but in JavaScript. You can verify that the produced code works by running the unit-tests:
+```
+yarn install
+yarn test
+```
+
+Finally, if you want to run your javascript in the browser, transpile with:
+```
+./bin/python transpile/transpile.py --browser
+```
+
+Note: the only difference between the browser version and the node version is that the former defines a `__init__` object on a `window` object while the latter defines a `__init__` object on the `module.exports` object. However, the unit-tests will fail if you transpile for the browser.
+
+[1]: https://github.com/QQuick/Transcrypt/commits/master?author=all3fox
+[2]: https://github.com/bastikr/boolean.py/pull/72
+[3]: https://github.com/nexB/license-expression/pull/19
+[4]: https://github.com/nexB/license-expression
+[5]: http://www.transcrypt.org/
+[6]: https://www.youtube.com/watch?v=9c4DEYIXYCM
+[7]: http://brython.info/
+[8]: https://pybee.org/project/projects/bridges/batavia/
+[9]: http://www.transcrypt.org/
+[10]: https://github.com/nexB/license-expression/issues/18
+[11]: https://github.com/QQuick/Transcrypt/commit/ace05bef3145c320affde286ed98e48338f43600
+[12]: https://github.com/QQuick/Transcrypt/commit/ea8420841b29d357587d8a92e3fd2c6dad6d4857
+[13]: https://github.com/QQuick/Transcrypt/commit/96111ccb0321790d4c1d94a4f13daafff8c53f57
+[14]: https://github.com/QQuick/Transcrypt/commit/e357ad72f42d45b70ff160df799bce7ae1c75cb5
+[15]: https://en.wikipedia.org/wiki/Aho%E2%80%93Corasick_algorithm
+[16]: https://developers.google.com/open-source/gsoc/
+[17]: https://spdx.org/
+[18]: https://github.com/pombredanne
