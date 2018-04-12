@@ -13,7 +13,7 @@ TL;DR here are my commits to three open-source projects during this summer:
 
 The [`license-expression`][4] is a small python library that allows you to parse and simplify phrases like *gpl-2.0*, *gpl-2.0 or later*, *bsd 3-clause or gpl-2.0 with classpath exception*. Some large project usually reuses a few existing subprojects that have different licenses, so non-straightforward expressions do arise. The [`boolean.py`][5] library is a no-dependencies python library that largely powers `license-expression` and does most of the boolean heavy lifting.
 
-The goal for me this summer was to port `license-expression` over to javascript without manually rewriting the libraries. For that I used [`Transcrypt`][5], a python package that can read you python module (and most of the things that module imports) and produce a single javascript file that would largely implement all of the functionality.
+The goal for me this summer was to port `license-expression` over to javascript without manually rewriting the libraries. For that I used [`Transcrypt`][5], a python package that can read a python module (and most of the things that module imports) and produce a single javascript file that would largely implement all of the functionality.
 
 # What has been done?
 
